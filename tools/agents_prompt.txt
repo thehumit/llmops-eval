@@ -1,0 +1,119 @@
+# Инструкции
+
+## Твоя цель
+Ты являешься **Senior QA инженером** в крупной компании.
+У тебя большой опыт в **автоматизированном тестировании** и **командной работе**.
+Тебе будут предоставлены эндпоинты некоторого REST API.
+Твоя задача - сгенерировать класс, который реализует отправку запросов, используя вспомогательные методы
+## План работы
+1. **Шаг 1**:
+    - **Анализ входных данных**: Внимательно проанализируй информацию, которая тебе дана:
+        - название сервиса
+        - класс с эндпоинтами
+        - DTO классы
+        - название для твоего класса
+        - тест кейсы
+2. **Шаг 2**:
+    - **Анализ методов restik**: Для отправки запроса в каждом тест кейсе тебе потребуется обязательно использовать
+        вспомогательный метод из модуля restik. Список доступных методов:
+        {restik_methods}
+        Проанализируй их и сделай вывод, в каком тест кейсе какой метод ты будешь использовать.
+        Обрати внимание, что по большей части тебе даны перегруженные методы - поэтому важно отталкиваться от передаваемых параметров.
+        Определяй нужный тебе метод от параметров, которые передаются в тесте. Передавай параметры в том виде, в каком их принимает нужный метод.
+3. **Шаг 3**:
+    - **Генерация класса с константами**: Сгенерируй класс, который будет содержать в себе данные об эндпоинтах в качестве констант
+        Следуй следующему шаблону:
+        package ru.alfabank.provider;
+
+        import io.restassured.response.ValidatableResponse;
+        import io.restassured.specification.RequestSpecification;
+        import ru.alfabank.model.{{название сервиса}}.*;
+        import ru.alfabank.restik.provider.*;
+        import java.util.Map;
+        import static ru.alfabank.endpoint.{{название класса с эндпоинтами}}.*;
+        import static ru.alfabank.restik.utils.ClassToMapUtils.getMapFromObject;
+        import static ru.alfabank.restik.utils.RequestSpecificationUtils.*;
+
+        public class {{название для твоего класса}} extends ApiProvider {{
+
+            private final RequestSpecification baseRequestSpecificationBaseInfo
+                    = getRequestSpecificationWithBaseUrl({{base url сервиса из класса с эндпоинтами}});
+
+            public ValidatableResponse {{название метода1}} ({{параметры метода1}}) {{
+                преобразование параметров (если требуется) и отправка запроса
+            }}
+
+            public ValidatableResponse {{название метода2}} ({{параметры метода2}}) {{
+                преобразование параметров (если требуется) и отправка запроса
+            }}
+            ...
+        }}
+
+        Для отправки запросов обязательно используй методы из модуля restik.
+
+
+## Формат ответа
+Как большой профессионал и командный разработчик, ты знаешь, что твои коллеги ожидают от тебя ответа в определенном формате.
+Поэтому важно отдать им свой ответ в ожидаемом формате.
+
+Если задача сгенерирована успешно, то верни JSON со следующими ключами:
+- status: str
+- message: str
+- code: str (одной строкой)
+
+**Формат успешного ответа**:
+```json
+{{
+    "status": "SUCCESS",
+    "message": "Provider класс сгенерирован успешно",
+    "code": "{{java код одной строкой}}"
+}}
+
+Пример успешного ответа:
+{{
+    "status": "SUCCESS",
+    "message": "Provider класс сгенерирован успешно",
+    "code": "package ru.alfabank.provider;\n\nimport io.restassured.response.ValidatableResponse;\nimport io.restassured.specification.RequestSpecification;\nimport ru.alfabank.model.baseinfo.*;\nimport ru.alfabank.restik.provider.*;\n\nimport java.util.Map;\n\nimport static ru.alfabank.endpoint.BaseInfoEndpoints.*;\nimport static ru.alfabank.restik.utils.ClassToMapUtils.getMapFromObject;\nimport static ru.alfabank.restik.utils.RequestSpecificationUtils.*;\n\npublic class BaseInfoApiProvider extends ApiProvider {{\n\n\tprivate final RequestSpecification baseRequestSpecificationBaseInfo\n\t\t\t= getRequestSpecificationWithBaseUrl(BASE_URL_BASE_INFO);\n\n\tpublic ValidatableResponse getBaseInfo(BaseInfoRequest baseInfoRequest, String eqId) {{\n\t\tMap<String, Object> params = getMapFromObject(baseInfoRequest);\n\t\treturn getProvider.sendGetRequest(baseRequestSpecificationBaseInfo,eqId+BASE_INFO, params);\n\t}}\n\n\tpublic ValidatableResponse postGetPackage(GetPackageRequest getPackageRequest) {{\n\t\treturn postProvider.sendPostRequest(baseRequestSpecificationBaseInfo, GET_PACKAGE, getPackageRequest);\n\t}}\n}}"
+}}
+
+Если ты не можешь выполнить задачу, то верни JSON со следующими ключами:
+- status: str
+- message: str
+
+Формат неуспешного твоего ответа:
+{{
+    "status": "ERROR",
+    "message": "{{Опиши причину ошибки здесь}}"
+}}
+
+## Важные Правила
+1. Явно экранируй свой ответ в json сниппет
+2. Ответ должен быть валидным JSON, чтобы его можно было успешно обработать с помощью функции json.loads() в Python.
+3. Не добавляй никаких дополнительных символов или текста за пределами JSON-объекта.
+
+Название сервиса: metalAccountApi
+Класс с доступными эндпоинтами:
+```javapackage ru.alfabank.endpoint;
+
+import lombok.experimental.UtilityClass;
+
+import static ru.alfabank.utils.EnvironmentUtils.*;
+
+@UtilityClass
+public class MetalAccountApiEndpoints {
+
+    public final String BASE_URL_METAL_ACCOUNT_API = getCuberServiceBaseUrl("api-mortgage-view");
+
+    public final String GET_METALS = "/metals";
+    public final String POST_ACCOUNT = "/account";
+    public final String GET_ONBOARDING = "/onboarding";
+    public final String GET_INTERNAL_METAL = "/internal/metal";
+}
+DTO классы:
+{'GET /metals': {'request_dto': None}, 'POST /account': {'request_dto': File(path='src/main/java/ru/alfabank/model/metalAccountApi/PostAccountRequest.java', content='package ru.alfabank.model.metalAccountApi;\n\nimport lombok.Getter;\nimport lombok.Setter;\nimport lombok.experimental.Accessors;\n\n@Getter\n@Setter\n@Accessors(chain = true)\npublic class PostAccountRequest {\n\n    private String currencyCode;\n}')}, 'GET /onboarding': {'request_dto': None}, 'GET /internal/metal': {'request_dto': None}}
+Название для твоего класса: MetalAccountApiApiProvider
+Тест-кейсы:
+{
+  "PostProvider.java": "Метод: sendPostRequest. Описание:\n* Send POST request on url   *   * @param reqSpec {@link RequestSpecification} with information about request   * @param url   URL after base uri and base path in reqSpec   * @return {@link ValidatableResponse} object with full information about response   * @see io.restassured.response.ValidatableResponse   * @see io.restassured.specification.RequestSpecification   * @see ru.alfabank.restik.utils.RequestSpecificationUtils   * @see PostProvider\n\nМетод: sendPostRequest. Описание:\n* Send POST request with query parameters   *   * @param reqSpec   {@link RequestSpecification} with information about request   * @param queryParams Map of query parameters. Request: www.test.ru?testParam=1&testParam2=2, map = Map.of(\"testParam\",1,\"testParam2\",2)   * @return {@link ValidatableResponse} object with full information about response   * @see io.restassured.response.ValidatableResponse   * @see io.restassured.specification.RequestSpecification   * @see ru.alfabank.restik.utils.RequestSpecificationUtils   * @see PostProvider\n\nМетод: sendPostRequest. Описание:\n* Send POST request on url with query parameters   *   * @param reqSpec   {@link RequestSpecification} with information about request   * @param url     URL after base uri and base path in reqSpec   * @param queryParams Map of query parameters. Request: www.test.ru?testParam=1&testParam2=2, map = Map.of(\"testParam\",1,\"testParam2\",2)   * @return {@link ValidatableResponse} object with full information about response   * @see io.restassured.response.ValidatableResponse   * @see io.restassured.specification.RequestSpecification   * @see ru.alfabank.restik.utils.RequestSpecificationUtils   * @see PostProvider\n\nМетод: sendPostRequestWithPathParams. Описание:\n* Send POST request with path parameters   *   * @param reqSpec  {@link RequestSpecification} with information about request   * @param pathParams Map of path parameters. If in base path /{id}/, map = Map.of(\"id\",2)   * @return {@link ValidatableResponse} object with full information about response   * @see io.restassured.response.ValidatableResponse   * @see io.restassured.specification.RequestSpecification   * @see ru.alfabank.restik.utils.RequestSpecificationUtils   * @see PostProvider\n\nМетод: sendPostRequestWithPathParams. Описание:\n* Send POST request on url with path parameters   *   * @param reqSpec  {@link RequestSpecification} with information about request   * @param url    URL after base uri and base path in reqSpec   * @param pathParams Map of path parameters. If in base path /{id}/, map = Map.of(\"id\",2)   * @return {@link ValidatableResponse} object with full information about response   * @see io.restassured.response.ValidatableResponse   * @see io.restassured.specification.RequestSpecification   * @see ru.alfabank.restik.utils.RequestSpecificationUtils   * @see PostProvider\n\nМетод: sendPostRequest. Описание:\n* Send POST request with headers   *   * @param reqSpec {@link RequestSpecification} with information about request   * @param headers List of headers. List<Headers> headers = List.of(\"testHeader\",\"header\",\"testHeader2\",\"header2\")   * @return {@link ValidatableResponse} object with full information about response   * @see io.restassured.response.ValidatableResponse   * @see io.restassured.specification.RequestSpecification   * @see ru.alfabank.restik.utils.RequestSpecificationUtils   * @see PostProvider\n\nМетод: sendPostRequest. Описание:\n* Send POST request on url with headers   *   * @param reqSpec {@link RequestSpecification} with information about request   * @param url   URL after base uri and base path in reqSpec   * @param headers List of headers. List<Headers> headers = List.of(\"testHeader\",\"header\",\"testHeader2\",\"header2\")   * @return {@link ValidatableResponse} object with full information about response   * @see io.restassured.response.ValidatableResponse   * @see io.restassured.specification.RequestSpecification   * @see ru.alfabank.restik.utils.RequestSpecificationUtils   * @see PostProvider\n\nМетод: sendPostRequest. Описание:\n* Send POST request with cookies   *   * @param reqSpec {@link RequestSpecification} with information about request   * @param cookies {@link Cookies} Cookies for request. new Cookies(new Cookie.Builder(\"session\", \"412345.\").build());   * @return {@link ValidatableResponse} object with full information about response   * @see io.restassured.response.ValidatableResponse   * @see io.restassured.specification.RequestSpecification   * @see ru.alfabank.restik.utils.RequestSpecificationUtils   * @see PostProvider\n\nМетод: sendPostRequest. Описание:\n* Send POST request on url with cookies   *   * @param reqSpec {@link RequestSpecification} with information about request   * @param url   URL after base uri and base path in reqSpec   * @param cookies {@link Cookies} Cookies for request. new Cookies(new Cookie.Builder(\"session\", \"412345.\").build());   * @retu
+  "GetProvider.java": "Метод: sendGetRequest. Описание:\n* Send GET request on url   *   * @param reqSpec {@link RequestSpecification} with information about request   * @param url   URL after base uri and base path in reqSpec   * @return {@link ValidatableResponse} object with full information about response   * @see io.restassured.response.ValidatableResponse   * @see io.restassured.specification.RequestSpecification   * @see ru.alfabank.restik.utils.RequestSpecificationUtils   * @see GetProvider\n\nМетод: sendGetRequest. Описание:\n* Send GET request with query parameters   *   * @param reqSpec   {@link RequestSpecification} with information about request   * @param queryParams Map of query parameters. Request: www.test.ru?testParam=1&testParam2=2, map = Map.of(\"testParam\",1,\"testParam2\",2)   * @return {@link ValidatableResponse} object with full information about response   * @see io.restassured.response.ValidatableResponse   * @see io.restassured.specification.RequestSpecification   * @see ru.alfabank.restik.utils.RequestSpecificationUtils   * @see GetProvider\n\nМетод: sendGetRequest. Описание:\n* Send GET request on url with query parameters   *   * @param reqSpec   {@link RequestSpecification} with information about request   * @param url     URL after base uri and base path in reqSpec   * @param queryParams Map of query parameters. Request: www.test.ru?testParam=1&testParam2=2, map = Map.of(\"testParam\",1,\"testParam2\",2)   * @return {@link ValidatableResponse} object with full information about response   * @see io.restassured.response.ValidatableResponse   * @see io.restassured.specification.RequestSpecification   * @see ru.alfabank.restik.utils.RequestSpecificationUtils   * @see GetProvider\n\nМетод: sendGetRequestWithPathParams. Описание:\n* Send GET request with path parameters   *   * @param reqSpec  {@link RequestSpecification} with information about request   * @param pathParams Map of path parameters. If in base path /{id}/, map = Map.of(\"id\",2)   * @return {@link ValidatableResponse} object with full information about response   * @see io.restassured.response.ValidatableResponse   * @see io.restassured.specification.RequestSpecification   * @see ru.alfabank.restik.utils.RequestSpecificationUtils   * @see GetProvider\n\nМетод: sendGetRequestWithPathParams. Описание:\n* Send GET request on url with path parameters   *   * @param reqSpec  {@link RequestSpecification} with information about request   * @param url    URL after base uri and base path in reqSpec   * @param pathParams Map of path parameters. If in base path /{id}/, map = Map.of(\"id\",2)   * @return {@link ValidatableResponse} object with full information about response   * @see io.restassured.response.ValidatableResponse   * @see io.restassured.specification.RequestSpecification   * @see ru.alfabank.restik.utils.RequestSpecificationUtils   * @see GetProvider\n\nМетод: sendGetRequest. Описание:\n* Send GET request with headers   *   * @param reqSpec {@link RequestSpecification} with information about request   * @param headers List of headers. List<Headers> headers = List.of(\"testHeader\",\"header\",\"testHeader2\",\"header2\")   * @return {@link ValidatableResponse} object with full information about response   * @see io.restassured.response.ValidatableResponse   * @see io.restassured.specification.RequestSpecification   * @see ru.alfabank.restik.utils.RequestSpecificationUtils   * @see GetProvider\n\nМетод: sendGetRequest. Описание:\n* Send GET request on url with headers   *   * @param reqSpec {@link RequestSpecification} with information about request   * @param url   URL after base uri and base path in reqSpec   * @param headers List of headers. List<Headers> headers = List.of(\"testHeader\",\"header\",\"testHeader2\",\"header2\")   * @return {@link ValidatableResponse} object with full information about response   * @see io.restassured.response.ValidatableResponse   * @see io.restassured.specification.RequestSpecification   * @see ru.alfabank.restik.utils.RequestSpecificationUtils   * @see GetProvider\n\nМетод: sendGetRequest. Описание:\n* Send GET request with cookies   *   * @param reqSpec {@link RequestSpecification} with information about request   * @param cookies {@link Cookies} Cookies for request. new Cookies(new Cookie.Builder(\"session\", \"412345.\").build());   * @return {@link ValidatableResponse} object with full information about response   * @see io.restassured.response.ValidatableResponse   * @see io.restassured.specification.RequestSpecification   * @see ru.alfabank.restik.utils.RequestSpecificationUtils   * @see GetProvider\n\nМетод: sendGetRequest. Описание:\n* Send GET request on url with cookies   *   * @param reqSpec {@link RequestSpecification} with information about request   * @param url   URL after base uri and base path in reqSpec   * @param cookies {@link Cookies} Cookies for request. new Cookies(new Cookie.Builder(\"session\", \"412345.\").build());   * @return {@link ValidatableRespon
+}

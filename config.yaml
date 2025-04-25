@@ -1,0 +1,28 @@
+# config.yaml
+base_url: "http://10.146.100.205:30001/v1"
+api_key: your_key_here
+path_to_eval_dataset: generated.json
+llms:
+  - name: openai-azure
+    type: openai
+    base_url: "10.146.100.205:30001/v1"
+
+
+rubrics:
+  score1_description: "The response is entirely incorrect and fails to address any aspect of the reference."
+  score2_description: "The response contains partial accuracy but includes major errors or significant omissions that affect its relevance to the reference."
+  score3_description: "The response is mostly accurate but lacks clarity, thoroughness, or minor details needed to fully address the reference."
+  score4_description: "The response is accurate and clear, with only minor omissions or slight inaccuracies in addressing the reference."
+  score5_description: "The response is completely accurate, clear, and thoroughly addresses the reference without any errors or omissions."
+
+metrics:
+  - name: forgetfulness
+    type: aspect_critic
+    definition: "Return 1 if the AI completes all Human requests fully without any rerequests; otherwise, return 0."
+
+
+
+dataset:
+  # Python file that defines get_evaluation_samples() → List[MultiTurnSample]
+  # loader: "my_dataset_loader.py"
+  loader: "tools/my_dataset.py"
